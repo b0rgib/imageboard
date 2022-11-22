@@ -1,0 +1,82 @@
+{%extends 'main/base.html'%}
+{%block title%}/b/ - {{t.head}}{%endblock%}
+{%block content%}
+<div class="container">
+<div class='row justify-content-center'>
+<form id ='ex1' method="post" action='' enctype="multipart/form-data">
+	<h1>Сообщение</h1>
+	{% csrf_token %}
+	{{form.as_p}}
+	<button type='submit' name='save'>Отправить сообщение</button>
+</form>
+</div>
+</div>
+<br>
+<script>
+    if ( window.history.replaceState ) {
+        window.history.replaceState( null, null, window.location.href );
+    }
+	if (window.location.hash.substring(0,5) === '#send') {
+		document.getElementById('ex1').text.value += '>>' + window.location.hash.substring(5,20) + '\n';
+		removeHash();
+	}
+	function send(number)
+	{
+		var link = '';
+		link = '>>' + number +'\n';
+		document.getElementById('ex1').text.value += link;
+		document.getElementById('ex1').scrollIntoView()
+	}
+	function removeHash () { 
+    history.pushState("", document.title, window.location.pathname
+                                                       + window.location.search);
+	}
+</script>
+<div id={{t.number}} class='container bg-light'>
+	<div class="row">
+        <div class='col col-md-auto'>{{t.name}}</div>
+        <div class='col col-md-auto'>{{t.date}}</div>
+        <div class='col col-md-auto'>№ {{t.number.id}}</div>
+      </div>
+      <div class="row">
+        {% if t.media %}<div class='col col-md-auto'>
+	<img src='{{t.media.url}}' width=200>
+	</div>{% endif %}
+        <div class='col col-md-auto'>
+          <div class="row"><h4>{{t.head}}</h4></div>
+          <div class="row"><div style="white-space: pre-wrap">{{t.text|safe}} </div></div>
+        </div>
+      </div>
+      <br>
+      <div class="row">
+        <div class='col col-md-auto'>Ответы: {{t.ref|safe}}</div>
+        <div class='col col-md-auto'><button type='submit' name={{t.number}} onclick='send({{t.number}});'>Ответить</button></div>
+      </div>
+      <br>
+    </div>
+    <br>
+	{%for message in t.message_set.all%}
+	<div class='container bg-light' id={{message.number}}>
+      <div class="row">
+        <div class='col col-md-auto'>{{message.name}}</div>
+        <div class='col col-md-auto'>{{message.date}}</div>
+        <div class='col col-md-auto'>№ {{message.number}}</div>
+        <div class="col col-md-auto">{% if message.sage%} sage {%endif%}</div>
+      </div>
+      <div class="row">
+        {% if message.media %}<div class='col col-md-auto'>
+	<img src='{{message.media.url}}' width=200>
+	</div>{% endif %}
+        <div class='col col-md-auto'><div style="white-space: pre-wrap">{{message.text|safe}}</div></div>
+      </div>
+      <br>
+      <div class="row">
+        <div class='col col-md-auto'>Ответы: {{message.ref|safe}}</div>
+        <div class='col col-md-auto'><button type='submit' name={{message.number}} onclick='send({{message.number}});'>Ответить</button></div>
+      </div>
+      <br>
+    </div>
+    <br>
+	{%endfor%}
+	<br>
+{%endblock%}
